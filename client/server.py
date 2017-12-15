@@ -9,7 +9,7 @@ app = Flask(__name__)
 
 #this decorator checks for the valid auth token
 def protected(f):
-    wraps(f)
+    @wraps(f)
     def decorated(*args, **kwargs):
         print(request.args)
         token = request.args.get("token")
@@ -40,13 +40,15 @@ def run_command():
     else:
         return "No command given"
 
-@protected
 @app.route('/stats/')
+@protected
 def get_stats():
+    s = stats.get_system_status()
+    print(s)
     return str(stats.get_system_status())
 
-@protected
 @app.route('/processlist/')
+@protected
 def show_process_list():
     count = request.args.get("count")
     sort = request.args.get("sort")
@@ -69,7 +71,7 @@ def login():
         token = jwt.encode(
             {
             'user' : auth.username,
-            'exp' : datetime.datetime.utcnow() + datetime.timedelta(seconds=30)},
+            'exp' : datetime.datetime.utcnow() + datetime.timedelta(seconds=300)},
              config.SECRET_KEY
              )
         return jsonify({'token' : token.decode('UTF-8')})
